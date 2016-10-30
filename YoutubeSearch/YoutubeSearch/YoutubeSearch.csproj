@@ -10,6 +10,7 @@
     <RootNamespace>YoutubeSearch</RootNamespace>
     <AssemblyName>YoutubeSearch</AssemblyName>
     <FileAlignment>512</FileAlignment>
+    <ReleaseVersion>1.1</ReleaseVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
