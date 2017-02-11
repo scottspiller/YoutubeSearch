@@ -36,7 +36,7 @@ foreach (var item in items.SearchQuery(querystring, querypages))
 - Author
 - Description
 - Duration
-- Thubmnail
+- Thumbnail
 - Video Url
 
 
