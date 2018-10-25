@@ -15,7 +15,7 @@ YoutubeSearch is a library for .NET, written in C#, to show search query results
 YoutubeSearch is licensed under the **GPL** license.
 
 # Example code
-```
+```c#
 // Keyword
 string querystring = "test";
 
@@ -28,6 +28,9 @@ foreach (var item in items.SearchQuery(querystring, querypages))
 {
     Console.WriteLine(item.Title);
 }
+
+//For asynchronous execution use:
+var result = await items.SearchQueryAsync(querystring, querypages);
 ```
 
 # Supported Items

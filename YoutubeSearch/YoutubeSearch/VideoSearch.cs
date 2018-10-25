@@ -19,11 +19,19 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace YoutubeSearch
 {
     public class VideoSearch
     {
+        //constants for easier maintainability
+        private const string Pattern = "<div class=\"yt-lockup-content\">.*?title=\"(?<NAME>.*?)\".*?</div></div></div></li>";
+        private const string YtQueryUrl = "https://www.youtube.com/results?search_query=";
+        private const string YtThumbnailUrl = "https://i.ytimg.com/vi/";
+        private const string YtWatchUrl = "http://www.youtube.com/watch?v=";
+
+
         List<VideoInformation> items;
 
         WebClient webclient;
@@ -41,6 +49,31 @@ namespace YoutubeSearch
         /// <param name="querystring"></param>
         /// <param name="querypages"></param>
         /// <returns></returns>
+        public async Task<List<VideoInformation>> SearchQueryTaskAsync(string querystring, int querypages)
+        {
+            items = new List<VideoInformation>();
+
+            webclient = new WebClient();
+
+            // Do search
+            for (int i = 1; i <= querypages; i++)
+            {
+                // Search address
+                string html = await webclient.DownloadStringTaskAsync(YtQueryUrl + querystring + "&page=" + i);
+
+                //extract information from page
+                ProcessPage(html);
+            }
+
+            return items;
+        }
+
+        /// <summary>
+        /// Doing search query with given parameters. Returns a List<> object.
+        /// </summary>
+        /// <param name="querystring"></param>
+        /// <param name="querypages"></param>
+        /// <returns></returns>
         public List<VideoInformation> SearchQuery(string querystring, int querypages)
         {
             items = new List<VideoInformation>();
@@ -51,45 +84,52 @@ namespace YoutubeSearch
             for (int i = 1; i <= querypages; i++)
             {
                 // Search address
-                string html = webclient.DownloadString("https://www.youtube.com/results?search_query=" + querystring + "&page=" + i);
+                string html = webclient.DownloadString(YtQueryUrl + querystring + "&page=" + i);
 
-                // Search string
-                string pattern = "<div class=\"yt-lockup-content\">.*?title=\"(?<NAME>.*?)\".*?</div></div></div></li>";
-                MatchCollection result = Regex.Matches(html, pattern, RegexOptions.Singleline);
-
-                for (int ctr = 0; ctr <= result.Count - 1; ctr++)
-                {
-                    // Title
-                    title = result[ctr].Groups[1].Value;
-
-                    // Author
-                    author = VideoItemHelper.cull(result[ctr].Value, "/user/", "class").Replace('"', ' ').TrimStart().TrimEnd();
-
-                    // Description
-                    description = VideoItemHelper.cull(result[ctr].Value, "dir=\"ltr\" class=\"yt-uix-redirect-link\">", "</div>");
-
-                    // Duration
-                    duration = VideoItemHelper.cull(VideoItemHelper.cull(result[ctr].Value, "id=\"description-id-", "span"), ": ", "<").Replace(".","");
-
-                    // Url
-                    url = string.Concat("http://www.youtube.com/watch?v=", VideoItemHelper.cull(result[ctr].Value, "watch?v=", "\""));
-
-                    // Thumbnail
-                    thumbnail = "https://i.ytimg.com/vi/" + VideoItemHelper.cull(result[ctr].Value, "watch?v=", "\"") + "/mqdefault.jpg";
-
-                    // Remove playlists
-                    if (title != "__title__")
-                    {
-                        if (duration != "")
-                        {
-                            // Add item to list
-                            items.Add(new VideoInformation() { Title = title, Author = author, Description = description, Duration = duration, Url = url, Thumbnail = thumbnail,  });
-                        }
-                    }
-                }
+                //extract information from page
+                ProcessPage(html);
             }
 
             return items;
         }
+
+
+        private void ProcessPage(string htmlPage)
+        {
+           
+            MatchCollection result = Regex.Matches(htmlPage, Pattern, RegexOptions.Singleline);
+
+            for (int ctr = 0; ctr <= result.Count - 1; ctr++)
+            {
+                // Title
+                title = result[ctr].Groups[1].Value;
+
+                // Author
+                author = VideoItemHelper.cull(result[ctr].Value, "/user/", "class").Replace('"', ' ').TrimStart().TrimEnd();
+
+                // Description
+                description = VideoItemHelper.cull(result[ctr].Value, "dir=\"ltr\" class=\"yt-uix-redirect-link\">", "</div>");
+
+                // Duration
+                duration = VideoItemHelper.cull(VideoItemHelper.cull(result[ctr].Value, "id=\"description-id-", "span"), ": ", "<").Replace(".", "");
+
+                // Url
+                url = string.Concat(YtWatchUrl, VideoItemHelper.cull(result[ctr].Value, "watch?v=", "\""));
+
+                // Thumbnail
+                thumbnail = YtThumbnailUrl + VideoItemHelper.cull(result[ctr].Value, "watch?v=", "\"") + "/mqdefault.jpg";
+
+                // Remove playlists
+                if (title != "__title__")
+                {
+                    if (duration != "")
+                    {
+                        // Add item to list
+                        items.Add(new VideoInformation() { Title = title, Author = author, Description = description, Duration = duration, Url = url, Thumbnail = thumbnail, });
+                    }
+                }
+            }
+        }
+
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -27,7 +28,7 @@ namespace Example_Application
 
             foreach (var item in items.SearchQuery(querystring, querypages))
             {
-                Console.WriteLine(i + "###########################");
+                Console.WriteLine(i + ". ###########################");
                 Console.WriteLine("Title: " + item.Title);
                 Console.WriteLine("Author: " + item.Author);
                 Console.WriteLine("Description: " + item.Description);
@@ -39,7 +40,45 @@ namespace Example_Application
                 i++;
             }
 
+            //----------------------------------------
+            //see difference of sync and async
+            SyncQuery();
+            AsyncQuery();
+
+
             Console.ReadLine();
+        }
+
+
+        //example for synchronous execution
+        private static void SyncQuery()
+        {
+            var querystring = "test";
+            int querypages = 1;
+
+            var items = new VideoSearch();
+
+            foreach (var item in items.SearchQuery(querystring, querypages))
+            {
+                Console.WriteLine("##########################");
+                Console.WriteLine(item.Title);
+                Console.WriteLine("");
+            }
+        }
+
+        //example for asynchronous execution
+        private static async void AsyncQuery()
+        {
+            var querystring = "test";
+            int querypages = 1;
+
+            var items = new VideoSearch();
+            foreach (var item in await items.SearchQueryTaskAsync(querystring, querypages))
+            {
+                Console.WriteLine("##########################");
+                Console.WriteLine(item.Title);
+                Console.WriteLine("");
+            }
         }
     }
 }
