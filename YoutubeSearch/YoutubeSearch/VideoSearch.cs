@@ -106,9 +106,13 @@ namespace YoutubeSearch
 
                 // Author
                 author = VideoItemHelper.cull(result[ctr].Value, "/user/", "class").Replace('"', ' ').TrimStart().TrimEnd();
+				if (string.IsNullOrEmpty(author))
+					author = VideoItemHelper.cull(result[ctr].Value, " >", "</a>");
 
                 // Description
                 description = VideoItemHelper.cull(result[ctr].Value, "dir=\"ltr\" class=\"yt-uix-redirect-link\">", "</div>");
+				if (string.IsNullOrEmpty(description))
+					description = VideoItemHelper.cull(result[ctr].Value, "<div class=\"yt-lockup-description yt-ui-ellipsis yt-ui-ellipsis-2\" dir=\"ltr\">", "</div>");
 
                 // Duration
                 duration = VideoItemHelper.cull(VideoItemHelper.cull(result[ctr].Value, "id=\"description-id-", "span"), ": ", "<").Replace(".", "");
