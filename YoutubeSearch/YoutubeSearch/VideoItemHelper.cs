@@ -26,12 +26,11 @@ namespace YoutubeSearch
                 Start = strSource.IndexOf(strStart, 0) + strStart.Length;
                 End = strSource.IndexOf(strEnd, Start);
 
-                return strSource.Substring(Start, End - Start);
+                if(End>=Start)
+                    return strSource.Substring(Start, End - Start);
             }
-            else
-            {
-                return "";
-            }
+
+            return "";
         }
     }
 }
