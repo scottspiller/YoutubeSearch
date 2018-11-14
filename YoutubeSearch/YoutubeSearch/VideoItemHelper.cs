@@ -19,18 +19,23 @@ namespace YoutubeSearch
     {
         public static string cull(string strSource, string strStart, string strEnd)
         {
-            int Start, End;
+			int Start, End;
 
             if (strSource.Contains(strStart) && strSource.Contains(strEnd))
             {
                 Start = strSource.IndexOf(strStart, 0) + strStart.Length;
                 End = strSource.IndexOf(strEnd, Start);
 
-                if(End>=Start)
-                    return strSource.Substring(Start, End - Start);
-            }
+				int val = (End > Start ? End - Start : Start - End);
+				if (val < 1 || val >= strSource.Length)
+					return "";
 
-            return "";
+				return strSource.Substring(Start, val);
+            }
+            else
+            {
+                return "";
+            }
         }
     }
 }
