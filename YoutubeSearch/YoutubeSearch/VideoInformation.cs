@@ -23,5 +23,8 @@ namespace YoutubeSearch
         public string Duration { get; set; }
         public string Url { get; set; }
         public string Thumbnail { get; set; }
+        public bool NoDescription { get; set; }
+        public bool NoAuthor { get; set; }
+        public string ViewCount { get; set; }
     }
 }
