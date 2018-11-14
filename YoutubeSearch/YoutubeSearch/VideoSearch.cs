@@ -153,15 +153,12 @@ namespace YoutubeSearch
 			}
 		}
 		    
-                // Remove playlists
-                if (title != "__title__")
-                {
-                    if (duration != "")
-                    {
-                        // Add item to list
-                        items.Add(new VideoInformation() { Title = title, Author = author, Description = description, Duration = duration, Url = url, Thumbnail = thumbnail, });
-                    }
-                }
+		// Remove playlists
+		if (title != "__title__" && duration != "")
+		{
+			// Add item to list
+			items.Add(new VideoInformation() { Title = title, Author = author, Description = description, Duration = duration, Url = url, Thumbnail = thumbnail, NoAuthor = noAuthor, NoDescription = noDesc, ViewCount = viewCount });
+		}
 		    
 		// Reset values to default for next loop.
 		noAuthor = false;
