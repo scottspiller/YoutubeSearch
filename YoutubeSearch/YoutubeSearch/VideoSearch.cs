@@ -20,6 +20,8 @@ using System.Collections.Generic;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.IO;
+using System;
 
 namespace YoutubeSearch
 {
@@ -36,12 +38,15 @@ namespace YoutubeSearch
 
         WebClient webclient;
 
-        string title;
-        string author;
-        string description;
-        string duration;
-        string url;
-        string thumbnail;
+	string title;
+	string author;
+	string description;
+	string duration;
+	string url;
+	string thumbnail;
+	string viewCount;
+	bool noDesc = false;
+	bool noAuthor = false;
 
         /// <summary>
         /// Doing search query with given parameters. Returns a List<> object.
@@ -101,37 +106,63 @@ namespace YoutubeSearch
 
             for (int ctr = 0; ctr <= result.Count - 1; ctr++)
             {
+		if (result[ctr].Value.Contains("yt-uix-button-subscription-container\">") || result[ctr].Value.Contains("\"instream\":true"))
+			continue; // Don't add to the list of search results if the value is a channel or live stream.
+		    
                 // Title
                 title = result[ctr].Groups[1].Value;
 
                 // Author
-                author = VideoItemHelper.cull(result[ctr].Value, "/user/", "class").Replace('"', ' ').TrimStart().TrimEnd();
-				if (string.IsNullOrEmpty(author))
-					author = VideoItemHelper.cull(result[ctr].Value, " >", "</a>");
+		author = VideoItemHelper.cull(result[ctr].Value, "/user/", "class").Replace('"', ' ').TrimStart().TrimEnd();
+		if (string.IsNullOrEmpty(author))
+		{
+			author = VideoItemHelper.cull(result[ctr].Value, " >", "</a>");
+			if (string.IsNullOrEmpty(author))
+				noAuthor = true;
+		}
 
                 // Description
-                description = VideoItemHelper.cull(result[ctr].Value, "dir=\"ltr\" class=\"yt-uix-redirect-link\">", "</div>");
-				if (string.IsNullOrEmpty(description))
-					description = VideoItemHelper.cull(result[ctr].Value, "<div class=\"yt-lockup-description yt-ui-ellipsis yt-ui-ellipsis-2\" dir=\"ltr\">", "</div>");
-
-                // Duration
-                duration = VideoItemHelper.cull(VideoItemHelper.cull(result[ctr].Value, "id=\"description-id-", "span"), ": ", "<").Replace(".", "");
-
+		description = VideoItemHelper.cull(result[ctr].Value, "dir=\"ltr\" class=\"yt-uix-redirect-link\">", "</div>");
+		if (string.IsNullOrEmpty(description))
+		{
+			description = VideoItemHelper.cull(result[ctr].Value, "<div class=\"yt-lockup-description yt-ui-ellipsis yt-ui-ellipsis-2\" dir=\"ltr\">", "</div>");
+			if (string.IsNullOrEmpty(description))
+				noDesc = true;
+		}
+		    
+		// Duration
+		duration = VideoItemHelper.cull(VideoItemHelper.cull(result[ctr].Value, "id=\"description-id-", "span"), ": ", "<").Replace(".", "");
+		    
                 // Url
                 url = string.Concat(YtWatchUrl, VideoItemHelper.cull(result[ctr].Value, "watch?v=", "\""));
 
                 // Thumbnail
                 thumbnail = YtThumbnailUrl + VideoItemHelper.cull(result[ctr].Value, "watch?v=", "\"") + "/mqdefault.jpg";
+		    
+		// View Count
+		{
+			string strView = VideoItemHelper.cull(result[ctr].Value, "</li><li>", "</li></ul></div>");
+			if (!string.IsNullOrEmpty(strView) && !string.IsNullOrWhiteSpace(strView))
+			{
+				string[] strParsedArr = strView.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
 
-                // Remove playlists
-                if (title != "__title__")
-                {
-                    if (duration != "")
-                    {
-                        // Add item to list
-                        items.Add(new VideoInformation() { Title = title, Author = author, Description = description, Duration = duration, Url = url, Thumbnail = thumbnail, });
-                    }
-                }
+				string parsedText = strParsedArr[0];
+				parsedText = parsedText.Trim().Replace(",", ".");
+
+				viewCount = parsedText;
+			}
+		}
+		    
+		// Remove playlists
+		if (title != "__title__" && duration != "")
+		{
+			// Add item to list
+			items.Add(new VideoInformation() { Title = title, Author = author, Description = description, Duration = duration, Url = url, Thumbnail = thumbnail, NoAuthor = noAuthor, NoDescription = noDesc, ViewCount = viewCount });
+		}
+		    
+		// Reset values to default for next loop.
+		noAuthor = false;
+		noDesc = false;
             }
         }
 
