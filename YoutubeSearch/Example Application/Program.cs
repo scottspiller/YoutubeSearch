@@ -44,11 +44,11 @@ namespace Example_Application
             //see difference of sync and async
             SyncQuery();
             AsyncQuery();
+            OffsetQuery();
 
 
             Console.ReadLine();
-        }
-
+        }    
 
         //example for synchronous execution
         private static void SyncQuery()
@@ -79,6 +79,30 @@ namespace Example_Application
                 Console.WriteLine(item.Title);
                 Console.WriteLine("");
             }
+        }
+
+        //example for using the offset value
+        private static async void OffsetQuery()
+        {
+            //this function will return all results from page 1 to page 10
+            var querystring = "test";
+            int querypages = 1;
+            int querypagesOffset;
+
+            //create list and search
+            var pages = new List<List<VideoInformation>>();
+            var items = new VideoSearch();
+
+            for (int i = 0; i < 10; i++)
+            {
+                //increase offset
+                querypagesOffset = i;
+
+                //each iteration will return the next page
+                //useful, if pages are needed in a sequence, in order to reduce waiting time
+                pages.Add(items.SearchQuery(querystring, querypages, querypagesOffset));
+            }
+            //page 1-10 (index in list 0-9) is now stored in 'pages'
         }
     }
 }

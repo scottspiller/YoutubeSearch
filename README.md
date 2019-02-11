@@ -22,6 +22,9 @@ string querystring = "test";
 // Number of result pages
 int querypages = 1;
 
+// Offset value for querypages
+int querypagesOffset = 2;
+
 var items = new VideoSearch();
 
 foreach (var item in items.SearchQuery(querystring, querypages))
@@ -31,6 +34,9 @@ foreach (var item in items.SearchQuery(querystring, querypages))
 
 //For asynchronous execution use:
 var result = await items.SearchQueryAsync(querystring, querypages);
+
+//This will query from page 3 to 4
+var offsetResult = items.SearchQuery(querystring, querypages, querypagesOffset);
 ```
 
 # Supported Items
