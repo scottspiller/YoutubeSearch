@@ -5,7 +5,7 @@ YoutubeSearch is a library for .NET, written in C#, to show search query results
 - .NET Standard 2.0
 
 # NuGet
-**Install-Package YoutubeSearch.dll**
+**https://www.nuget.org/packages/YoutubeSearch.NETSTANDARD/**
 
 # License
 YoutubeSearch is licensed under the **GPL** license.
